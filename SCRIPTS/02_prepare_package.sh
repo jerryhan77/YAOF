@@ -245,6 +245,7 @@ git clone --depth 1 https://github.com/KyleRicardo/MentoHUST-OpenWrt-ipk package
 #sed -i '/mosdns-init-openwrt/d' feeds/packages/net/mosdns/Makefile
 svn co https://github.com/QiuSimons/openwrt-mos/trunk/mosdns package/new/mosdns
 svn co https://github.com/QiuSimons/openwrt-mos/trunk/luci-app-mosdns package/new/luci-app-mosdns
+svn co https://github.com/QiuSimons/openwrt-mos/trunk/v2ray-geodata package/new/v2ray-geodata
 # 流量监管
 svn co https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-netdata package/lean/luci-app-netdata
 # 上网 APP 过滤
@@ -353,7 +354,8 @@ sed -i '/Clang.CN.CIDR/a\o:value("https://gh.404delivr.workers.dev/https://githu
 popd
 # v2raya
 git clone --depth 1 https://github.com/zxlhhyccc/luci-app-v2raya.git package/new/luci-app-v2raya
-svn co https://github.com/v2rayA/v2raya-openwrt/trunk/v2raya package/new/v2raya
+svn co https://github.com/openwrt/packages/trunk/net/v2raya feeds/packages/net/v2raya
+ln -sf ../../../feeds/packages/net/v2raya ./package/feeds/packages/v2raya
 # socat
 svn co https://github.com/Lienol/openwrt-package/trunk/luci-app-socat package/new/luci-app-socat
 # 订阅转换
