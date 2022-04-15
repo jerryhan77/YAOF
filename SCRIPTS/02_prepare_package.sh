@@ -149,8 +149,8 @@ sed -i 's,kmod-usb-net-rtl8152,kmod-usb-net-rtl8152-vendor,g' target/linux/rockc
 # UPX 可执行软件压缩
 sed -i '/patchelf pkgconf/i\tools-y += ucl upx' ./tools/Makefile
 sed -i '\/autoconf\/compile :=/i\$(curdir)/upx/compile := $(curdir)/ucl/compile' ./tools/Makefile
-svn export https://github.com/immortalwrt/immortalwrt/branches/master/tools/upx tools/upx
-svn export https://github.com/immortalwrt/immortalwrt/branches/master/tools/ucl tools/ucl
+svn export https://github.com/coolsnowwolf/openwrt/branches/lede-17.01/tools/ucl tools/ucl
+svn export https://github.com/coolsnowwolf/openwrt/branches/lede-17.01/tools/upx tools/upx
 
 ### 获取额外的 LuCI 应用、主题和依赖 ###
 # 更换 golang 版本
