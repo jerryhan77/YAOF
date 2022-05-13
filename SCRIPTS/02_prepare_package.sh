@@ -23,7 +23,8 @@ echo "net.netfilter.nf_conntrack_helper = 1" >>./package/kernel/linux/files/sysc
 
 ### 必要的 Patches ###
 # offload bug fix
-wget -qO - https://github.com/openwrt/openwrt/pull/4849.patch | patch -p1
+#wget -qO - https://github.com/openwrt/openwrt/commit/53fc6e9.patch | patch -p1
+#wget -qO - https://github.com/openwrt/openwrt/pull/4849.patch | patch -p1
 # TCP performance optimizations backport from linux/net-next
 #cp -rf ../PATCH/backport/TCP/* ./target/linux/generic/backport-5.10/
 # UDP performance optimizations backport from linux/net-next
@@ -108,16 +109,24 @@ popd
 ### 获取额外的基础软件包 ###
 # 更换为 ImmortalWrt Uboot 以及 Target
 rm -rf ./target/linux/rockchip
-svn export https://github.com/immortalwrt/immortalwrt/branches/master/target/linux/rockchip target/linux/rockchip
+#svn export https://github.com/immortalwrt/immortalwrt/branches/master/target/linux/rockchip target/linux/rockchip
+svn export https://github.com/coolsnowwolf/lede/trunk/target/linux/rockchip target/linux/rockchip
+wget -qO - https://github.com/immortalwrt/immortalwrt/commit/af93561.patch | patch -p1
+rm -rf ./target/linux/rockchip/Makefile
+wget -P target/linux/rockchip/ https://github.com/openwrt/openwrt/raw/openwrt-22.03/target/linux/rockchip/Makefile
+rm -rf ./target/linux/rockchip/patches-5.10/002-net-usb-r8152-add-LED-configuration-from-OF.patch
+rm -rf ./target/linux/rockchip/patches-5.10/003-dt-bindings-net-add-RTL8152-binding-documentation.patch
 rm -rf ./package/boot/uboot-rockchip
-svn export https://github.com/immortalwrt/immortalwrt/branches/master/package/boot/uboot-rockchip package/boot/uboot-rockchip
+#svn export https://github.com/immortalwrt/immortalwrt/branches/master/package/boot/uboot-rockchip package/boot/uboot-rockchip
+svn export https://github.com/coolsnowwolf/lede/trunk/package/boot/uboot-rockchip package/boot/uboot-rockchip
 svn export https://github.com/immortalwrt/immortalwrt/branches/master/package/boot/arm-trusted-firmware-rockchip-vendor package/boot/arm-trusted-firmware-rockchip-vendor
 rm -rf ./package/kernel/linux/modules/video.mk
 wget -P package/kernel/linux/modules/ https://github.com/immortalwrt/immortalwrt/raw/master/package/kernel/linux/modules/video.mk
 rm -rf ./target/linux/generic/config-5.10
 wget -P target/linux/generic/ https://github.com/immortalwrt/immortalwrt/raw/master/target/linux/generic/config-5.10
 # ImmortalWrt Uboot TMP Fix
-wget -qO- https://github.com/immortalwrt/immortalwrt/commit/433c93e.patch | patch -REp1
+#wget -qO- https://github.com/immortalwrt/immortalwrt/commit/433c93e.patch | patch -REp1
+wget -qO- https://github.com/coolsnowwolf/lede/commit/0104258.patch | patch -REtp1
 # R4S超频到 2.2/1.8 GHz
 #rm -rf ./target/linux/rockchip/patches-5.4/992-rockchip-rk3399-overclock-to-2.2-1.8-GHz-for-NanoPi4.patch
 #cp -f ../PATCH/target_r4s/991-rockchip-rk3399-overclock-to-2.2-1.8-GHz-for-NanoPi4.patch ./target/linux/rockchip/patches-5.4/991-rockchip-rk3399-overclock-to-2.2-1.8-GHz-for-NanoPi4.patch
@@ -209,22 +218,26 @@ svn export https://github.com/xiaorouji/openwrt-passwall/trunk/chinadns-ng packa
 # CPU 控制相关
 svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-cpufreq feeds/luci/applications/luci-app-cpufreq
 ln -sf ../../../feeds/luci/applications/luci-app-cpufreq ./package/feeds/luci/luci-app-cpufreq
-sed -i 's,1608,1800,g' feeds/luci/applications/luci-app-cpufreq/root/etc/uci-defaults/cpufreq
-sed -i 's,2016,2208,g' feeds/luci/applications/luci-app-cpufreq/root/etc/uci-defaults/cpufreq
-sed -i 's,1512,1608,g' feeds/luci/applications/luci-app-cpufreq/root/etc/uci-defaults/cpufreq
+sed -i 's,1608,1800,g' feeds/luci/applications/luci-app-cpufreq/root/etc/uci-defaults/10-cpufreq
+sed -i 's,2016,2208,g' feeds/luci/applications/luci-app-cpufreq/root/etc/uci-defaults/10-cpufreq
+sed -i 's,1512,1608,g' feeds/luci/applications/luci-app-cpufreq/root/etc/uci-defaults/10-cpufreq
 svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/luci-app-cpulimit package/lean/luci-app-cpulimit
 svn export https://github.com/immortalwrt/packages/trunk/utils/cpulimit feeds/packages/utils/cpulimit
 ln -sf ../../../feeds/packages/utils/cpulimit ./package/feeds/packages/cpulimit
 # 动态DNS
 sed -i '/boot()/,+2d' feeds/packages/net/ddns-scripts/files/etc/init.d/ddns
-svn export https://github.com/kiddin9/openwrt-packages/trunk/ddns-scripts-aliyun package/lean/ddns-scripts_dnspod
-svn export https://github.com/kiddin9/openwrt-packages/trunk/ddns-scripts-dnspod package/lean/ddns-scripts_aliyun
+svn export https://github.com/linkease/istore-packages/trunk/ddns-scripts_dnspod package/lean/ddns-scripts_dnspod
+#svn export https://github.com/linkease/istore-packages/trunk/ddns-scripts_aliyun package/lean/ddns-scripts_aliyun
 svn export https://github.com/QiuSimons/OpenWrt_luci-app/trunk/luci-app-tencentddns package/lean/luci-app-tencentddns
 svn export https://github.com/kenzok8/openwrt-packages/trunk/luci-app-aliddns feeds/luci/applications/luci-app-aliddns
 ln -sf ../../../feeds/luci/applications/luci-app-aliddns ./package/feeds/luci/luci-app-aliddns
 # Docker 容器
 rm -rf ./feeds/luci/applications/luci-app-dockerman
 svn export https://github.com/lisaac/luci-app-dockerman/trunk/applications/luci-app-dockerman feeds/luci/applications/luci-app-dockerman
+sed -i '/auto_start/d' feeds/luci/applications/luci-app-dockerman/root/etc/uci-defaults/luci-app-dockerman
+pushd feeds/packages
+wget -qO- https://github.com/openwrt/packages/commit/ed7396a.patch | patch -p1
+popd
 rm -rf ./feeds/luci/collections/luci-lib-docker
 svn export https://github.com/lisaac/luci-lib-docker/trunk/collections/luci-lib-docker feeds/luci/collections/luci-lib-docker
 #sed -i 's/+docker/+docker \\\n\t+dockerd/g' ./feeds/luci/applications/luci-app-dockerman/Makefile
@@ -292,7 +305,7 @@ svn export https://github.com/QiuSimons/dragino2-teasiu/trunk/package/teasiu/luc
 svn export https://github.com/xiaorouji/openwrt-passwall/branches/luci/luci-app-passwall package/new/luci-app-passwall
 pushd package/new/luci-app-passwall
 sed -i 's,default n,default y,g' Makefile
-sed -i '/trojan-go/d' Makefile
+sed -i '/trojan-plus/d' Makefile
 sed -i '/v2ray-core/d' Makefile
 sed -i '/v2ray-plugin/d' Makefile
 sed -i '/xray-plugin/d' Makefile
@@ -314,7 +327,23 @@ svn export https://github.com/xiaorouji/openwrt-passwall/trunk/brook package/new
 svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/trojan-plus package/new/trojan-plus
 svn export https://github.com/xiaorouji/openwrt-passwall/trunk/ssocks package/new/ssocks
 svn export https://github.com/xiaorouji/openwrt-passwall/trunk/hysteria package/new/hysteria
-# passwall2
+svn export https://github.com/xiaorouji/openwrt-passwall/trunk/dns2tcp package/new/dns2tcp
+# Passwall 白名单
+echo '
+checkip.synology.com
+checkipv6.synology.com
+checkport.synology.com
+ddns.synology.com
+account.synology.com
+whatismyip.akamai.com
+checkip.dyndns.org
+teamviewer.com
+bing.com
+api.ipify.org
+epicgames.com
+emby.kyarucloud.moe
+' >>./package/new/luci-app-passwall/root/usr/share/passwall/rules/direct_host
+# Passwall2
 svn export https://github.com/xiaorouji/openwrt-passwall2/trunk/luci-app-passwall2 package/new/luci-app-passwall2
 wget -P package/new/luci-app-passwall2/ https://github.com/QiuSimons/OpenWrt-Add/raw/master/move_2_services.sh
 chmod -R 755 ./package/new/luci-app-passwall2/move_2_services.sh
@@ -360,10 +389,10 @@ svn export https://github.com/coolsnowwolf/packages/trunk/net/redsocks2 package/
 svn export https://github.com/xiaorouji/openwrt-passwall/trunk/ipt2socks package/lean/ipt2socks
 svn export https://github.com/xiaorouji/openwrt-passwall/trunk/trojan package/lean/trojan
 svn export https://github.com/xiaorouji/openwrt-passwall/trunk/tcping package/lean/tcping
-svn export https://github.com/xiaorouji/openwrt-passwall/trunk/trojan-go package/lean/trojan-go
 svn export https://github.com/fw876/helloworld/trunk/simple-obfs package/lean/simple-obfs
 svn export https://github.com/fw876/helloworld/trunk/naiveproxy package/lean/naiveproxy
 svn export https://github.com/fw876/helloworld/trunk/v2ray-core package/lean/v2ray-core
+svn export https://github.com/zxlhhyccc/bf-package-master/trunk/ctcgfw/sagernet-core package/lean/sagernet-core
 svn export https://github.com/fw876/helloworld/trunk/xray-core package/lean/xray-core
 svn export https://github.com/fw876/helloworld/trunk/v2ray-plugin package/lean/v2ray-plugin
 svn export https://github.com/fw876/helloworld/trunk/xray-plugin package/lean/xray-plugin
@@ -382,8 +411,9 @@ wget -qO - https://github.com/fw876/helloworld/commit/5bbf6e7.patch | patch -p1
 #wget -qO - https://github.com/fw876/helloworld/commit/ea3b4bd.patch | patch -p1
 popd
 pushd package/lean/luci-app-ssr-plus
+sed -i '/Trojan:/d' Makefile
 sed -i 's,default n,default y,g' Makefile
-sed -i '/trojan-go/d' Makefile
+sed -i '/trojan-plus/d' Makefile
 sed -i '/v2ray-core/d' Makefile
 sed -i '/v2ray-plugin/d' Makefile
 sed -i '/xray-plugin/d' Makefile
@@ -404,9 +434,9 @@ ln -sf ../../../feeds/packages/net/v2raya ./package/feeds/packages/v2raya
 svn export https://github.com/Lienol/openwrt-package/trunk/luci-app-socat package/new/luci-app-socat
 # 订阅转换
 svn export https://github.com/immortalwrt/packages/trunk/net/subconverter feeds/packages/net/subconverter
-wget https://github.com/immortalwrt/packages/raw/b7b4499/net/subconverter/Makefile -O feeds/packages/net/subconverter/Makefile
-mkdir -p ./feeds/packages/net/subconverter/patches
-wget https://github.com/immortalwrt/packages/raw/b7b4499/net/subconverter/patches/100-stdcxxfs.patch -O feeds/packages/net/subconverter/patches/100-stdcxxfs.patch
+#wget https://github.com/immortalwrt/packages/raw/b7b4499/net/subconverter/Makefile -O feeds/packages/net/subconverter/Makefile
+#mkdir -p ./feeds/packages/net/subconverter/patches
+#wget https://github.com/immortalwrt/packages/raw/b7b4499/net/subconverter/patches/100-stdcxxfs.patch -O feeds/packages/net/subconverter/patches/100-stdcxxfs.patch
 sed -i '\/bin\/subconverter/a\\t$(STAGING_DIR_HOST)/bin/upx --lzma --best $(1)/usr/bin/subconverter' feeds/packages/net/subconverter/Makefile
 ln -sf ../../../feeds/packages/net/subconverter ./package/feeds/packages/subconverter
 svn export https://github.com/immortalwrt/packages/trunk/libs/jpcre2 feeds/packages/libs/jpcre2
@@ -414,10 +444,10 @@ ln -sf ../../../feeds/packages/libs/jpcre2 ./package/feeds/packages/jpcre2
 svn export https://github.com/immortalwrt/packages/trunk/libs/rapidjson feeds/packages/libs/rapidjson
 ln -sf ../../../feeds/packages/libs/rapidjson ./package/feeds/packages/rapidjson
 svn export https://github.com/immortalwrt/packages/trunk/libs/libcron feeds/packages/libs/libcron
-wget https://github.com/immortalwrt/packages/raw/b7b4499/libs/libcron/Makefile -O feeds/packages/libs/libcron/Makefile
+#wget https://github.com/immortalwrt/packages/raw/b7b4499/libs/libcron/Makefile -O feeds/packages/libs/libcron/Makefile
 ln -sf ../../../feeds/packages/libs/libcron ./package/feeds/packages/libcron
 svn export https://github.com/immortalwrt/packages/trunk/libs/quickjspp feeds/packages/libs/quickjspp
-wget https://github.com/immortalwrt/packages/raw/b7b4499/libs/quickjspp/Makefile -O feeds/packages/libs/quickjspp/Makefile
+#wget https://github.com/immortalwrt/packages/raw/b7b4499/libs/quickjspp/Makefile -O feeds/packages/libs/quickjspp/Makefile
 ln -sf ../../../feeds/packages/libs/quickjspp ./package/feeds/packages/quickjspp
 svn export https://github.com/immortalwrt/packages/trunk/libs/toml11 feeds/packages/libs/toml11
 ln -sf ../../../feeds/packages/libs/toml11 ./package/feeds/packages/toml11
@@ -437,8 +467,9 @@ svn export https://github.com/coolsnowwolf/packages/trunk/net/vlmcsd package/lea
 git clone -b master --depth 1 https://github.com/jerrykuku/luci-app-vssr.git package/lean/luci-app-vssr
 git clone -b master --depth 1 https://github.com/jerrykuku/lua-maxminddb.git package/lean/lua-maxminddb
 pushd package/lean/luci-app-vssr
+sed -i '/Trojan:/d' Makefile
 sed -i 's,default n,default y,g' Makefile
-sed -i '/trojan-go/d' Makefile
+sed -i '/trojan-plus/d' Makefile
 sed -i '/v2ray-core/d' Makefile
 sed -i '/v2ray-plugin/d' Makefile
 sed -i '/xray-plugin/d' Makefile
@@ -474,6 +505,7 @@ svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/addition-trans-zh pack
 # Lets Fuck
 mkdir package/base-files/files/usr/bin
 wget -P package/base-files/files/usr/bin/ https://github.com/QiuSimons/OpenWrt-Add/raw/master/fuck
+wget -P package/base-files/files/usr/bin/ https://github.com/QiuSimons/OpenWrt-Add/raw/master/ss2v2ray
 # 最大连接数
 sed -i 's/16384/65535/g' package/kernel/linux/files/sysctl-nf-conntrack.conf
 # 生成默认配置及缓存
