@@ -31,8 +31,7 @@ echo "net.netfilter.nf_conntrack_helper = 1" >>./package/kernel/linux/files/sysc
 
 ### 必要的 Patches ###
 # offload bug fix
-#wget -qO - https://github.com/openwrt/openwrt/commit/53fc6e9.patch | patch -p1
-#wget -qO - https://github.com/openwrt/openwrt/pull/4849.patch | patch -p1
+wget -qO - https://github.com/openwrt/openwrt/pull/4849.patch | patch -p1
 # TCP performance optimizations backport from linux/net-next
 #cp -rf ../PATCH/backport/TCP/* ./target/linux/generic/backport-5.10/
 # UDP performance optimizations backport from linux/net-next
@@ -87,6 +86,7 @@ popd
 # Patch FireWall 以增添 FullCone 功能
 # FW4
 mkdir package/network/config/firewall4/patches
+wget 'https://git.openwrt.org/?p=project/firewall4.git;a=patch;h=38423fae' -O package/network/config/firewall4/patches/990-unconditionally-allow-ct-status-dnat.patch
 wget -P package/network/config/firewall4/patches/ https://github.com/wongsyrone/lede-1/raw/master/package/network/config/firewall4/patches/999-01-firewall4-add-fullcone-support.patch
 sed -i 's/-1,3 +1,5/-2,3 +2,5/g' package/network/config/firewall4/patches/999-01-firewall4-add-fullcone-support.patch
 mkdir package/libs/libnftnl/patches
@@ -123,17 +123,8 @@ svn export https://github.com/coolsnowwolf/lede/trunk/package/boot/uboot-rockchi
 svn export https://github.com/immortalwrt/immortalwrt/branches/master/package/boot/arm-trusted-firmware-rockchip-vendor package/boot/arm-trusted-firmware-rockchip-vendor
 rm -rf ./package/kernel/linux/modules/video.mk
 wget -P package/kernel/linux/modules/ https://github.com/immortalwrt/immortalwrt/raw/master/package/kernel/linux/modules/video.mk
-rm -rf ./target/linux/generic/config-5.10
-wget -P target/linux/generic/ https://github.com/immortalwrt/immortalwrt/raw/master/target/linux/generic/config-5.10
-echo '
-CONFIG_DEBUG_INFO_REDUCED=y
-' >>./target/linux/generic/config-5.10
 # LRNG
 cp -rf ../PATCH/LRNG/* ./target/linux/generic/hack-5.10/
-echo '
-CONFIG_LRNG=y
-CONFIG_LRNG_JENT=y
-' >>./target/linux/generic/config-5.10
 # ImmortalWrt Uboot TMP Fix
 #wget -qO- https://github.com/immortalwrt/immortalwrt/commit/433c93e.patch | patch -REp1
 wget -qO- https://github.com/coolsnowwolf/lede/commit/0104258.patch | patch -REtp1
@@ -179,7 +170,7 @@ git clone -b master --depth 1 https://github.com/BROBIRD/openwrt-r8168.git packa
 patch -p1 <../PATCH/r8168/r8168-fix_LAN_led-for_r4s-from_TL.patch
 # R8152驱动
 svn export https://github.com/immortalwrt/immortalwrt/branches/master/package/kernel/r8152 package/new/r8152
-sed -i 's,kmod-usb-net-rtl8152,kmod-usb-net-rtl8152-vendor,g' target/linux/rockchip/image/armv8.mk
+#sed -i 's,kmod-usb-net-rtl8152,kmod-usb-net-rtl8152-vendor,g' target/linux/rockchip/image/armv8.mk
 # UPX 可执行软件压缩
 sed -i '/patchelf pkgconf/i\tools-y += ucl upx' ./tools/Makefile
 sed -i '\/autoconf\/compile :=/i\$(curdir)/upx/compile := $(curdir)/ucl/compile' ./tools/Makefile
@@ -219,8 +210,8 @@ ln -sf ../../../feeds/luci/applications/luci-app-arpbind ./package/feeds/luci/lu
 svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-autoreboot package/lean/luci-app-autoreboot
 # Boost 通用即插即用
 svn export https://github.com/QiuSimons/slim-wrt/branches/main/slimapps/application/luci-app-boostupnp package/new/luci-app-boostupnp
-#rm -rf ./feeds/packages/net/miniupnpd
-#svn export https://github.com/msylgj/packages/branches/miniupnpd-nftables/net/miniupnpd feeds/packages/net/miniupnpd
+rm -rf ./feeds/packages/net/miniupnpd
+git clone -b main --depth 1 https://github.com/msylgj/miniupnpd.git feeds/packages/net/miniupnpd
 #svn export https://github.com/coolsnowwolf/packages/trunk/net/miniupnpd feeds/packages/net/miniupnpd
 # ChinaDNS
 git clone -b luci --depth 1 https://github.com/QiuSimons/openwrt-chinadns-ng.git package/new/luci-app-chinadns-ng
@@ -314,7 +305,7 @@ svn export https://github.com/QiuSimons/dragino2-teasiu/trunk/package/teasiu/luc
 #svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-passwall package/new/luci-app-passwall
 svn export https://github.com/xiaorouji/openwrt-passwall/branches/luci/luci-app-passwall package/new/luci-app-passwall
 pushd package/new/luci-app-passwall
-#sed -i 's,iptables-legacy,iptables-nft,g' Makefile
+sed -i 's,iptables-legacy,iptables-nft,g' Makefile
 popd
 wget -P package/new/luci-app-passwall/ https://github.com/QiuSimons/OpenWrt-Add/raw/master/move_2_services.sh
 chmod -R 755 ./package/new/luci-app-passwall/move_2_services.sh
@@ -353,7 +344,7 @@ pushd package/new/luci-app-passwall2
 bash move_2_services.sh
 popd
 pushd package/new/luci-app-passwall2
-#sed -i 's,iptables-legacy,iptables-nft,g' Makefile
+sed -i 's,iptables-legacy,iptables-nft,g' Makefile
 popd
 # qBittorrent 下载
 svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-qbittorrent package/lean/luci-app-qbittorrent
@@ -465,7 +456,8 @@ git clone -b master --depth 1 https://github.com/brvphoenix/luci-app-wrtbwmon.gi
 # 迅雷快鸟宽带加速
 git clone --depth 1 https://github.com/kiddin9/luci-app-xlnetacc.git package/lean/luci-app-xlnetacc
 # Zerotier
-svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-zerotier feeds/luci/applications/luci-app-zerotier
+svn export https://github.com/wongsyrone/lede-1/trunk/package/external/luci-app-zerotier feeds/luci/applications/luci-app-zerotier
+#svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-zerotier feeds/luci/applications/luci-app-zerotier
 wget -P feeds/luci/applications/luci-app-zerotier/ https://github.com/QiuSimons/OpenWrt-Add/raw/master/move_2_services.sh
 chmod -R 755 ./feeds/luci/applications/luci-app-zerotier/move_2_services.sh
 pushd feeds/luci/applications/luci-app-zerotier
@@ -473,12 +465,13 @@ bash move_2_services.sh
 popd
 ln -sf ../../../feeds/luci/applications/luci-app-zerotier ./package/feeds/luci/luci-app-zerotier
 rm -rf ./feeds/packages/net/zerotier
-svn export https://github.com/openwrt/packages/trunk/net/zerotier feeds/packages/net/zerotier
+#svn export https://github.com/openwrt/packages/trunk/net/zerotier feeds/packages/net/zerotier
+svn export https://github.com/wongsyrone/packages-1/trunk/net/zerotier feeds/packages/net/zerotier
 rm -rf ./feeds/packages/net/zerotier/files/etc/init.d/zerotier
 #sed -i '/Default,one/a\\t$(STAGING_DIR_HOST)/bin/upx --lzma --best $(PKG_BUILD_DIR)/zerotier-one' feeds/packages/net/zerotier/Makefile
 # 翻译及部分功能优化
 svn export https://github.com/QiuSimons/OpenWrt-Add/trunk/addition-trans-zh package/lean/lean-translate
-#sed -i 's,iptables-mod-fullconenat,iptables-nft +kmod-nft-fullcone,g' package/lean/lean-translate/Makefile
+sed -i 's,iptables-mod-fullconenat,iptables-nft +kmod-nft-fullcone,g' package/lean/lean-translate/Makefile
 
 ### 最后的收尾工作 ###
 # Lets Fuck
@@ -489,6 +482,51 @@ wget -P package/base-files/files/usr/bin/ https://github.com/QiuSimons/OpenWrt-A
 sed -i 's/16384/65535/g' package/kernel/linux/files/sysctl-nf-conntrack.conf
 # 生成默认配置及缓存
 rm -rf .config
+
+echo '
+CONFIG_RESERVE_ACTIVEFILE_TO_PREVENT_DISK_THRASHING=y
+CONFIG_RESERVE_ACTIVEFILE_KBYTES=65536
+CONFIG_RESERVE_INACTIVEFILE_TO_PREVENT_DISK_THRASHING=y
+CONFIG_RESERVE_INACTIVEFILE_KBYTES=65536
+
+CONFIG_LRNG=y
+# CONFIG_LRNG_OVERSAMPLE_ENTROPY_SOURCES is not set
+CONFIG_LRNG_IRQ=y
+CONFIG_LRNG_CONTINUOUS_COMPRESSION_ENABLED=y
+# CONFIG_LRNG_CONTINUOUS_COMPRESSION_DISABLED is not set
+CONFIG_LRNG_ENABLE_CONTINUOUS_COMPRESSION=y
+# CONFIG_LRNG_SWITCHABLE_CONTINUOUS_COMPRESSION is not set
+# CONFIG_LRNG_COLLECTION_SIZE_32 is not set
+# CONFIG_LRNG_COLLECTION_SIZE_256 is not set
+# CONFIG_LRNG_COLLECTION_SIZE_512 is not set
+CONFIG_LRNG_COLLECTION_SIZE_1024=y
+# CONFIG_LRNG_COLLECTION_SIZE_2048 is not set
+# CONFIG_LRNG_COLLECTION_SIZE_4096 is not set
+# CONFIG_LRNG_COLLECTION_SIZE_8192 is not set
+CONFIG_LRNG_COLLECTION_SIZE=1024
+# CONFIG_LRNG_HEALTH_TESTS is not set
+CONFIG_LRNG_IRQ_ENTROPY_RATE=256
+# CONFIG_LRNG_JENT is not set
+CONFIG_LRNG_CPU=y
+CONFIG_LRNG_CPU_ENTROPY_RATE=8
+# CONFIG_LRNG_DRNG_SWITCH is not set
+# CONFIG_LRNG_TESTING_MENU is not set
+# CONFIG_LRNG_SELFTEST is not set
+
+# CONFIG_IR_SANYO_DECODER is not set
+# CONFIG_IR_SHARP_DECODER is not set
+# CONFIG_IR_MCE_KBD_DECODER is not set
+# CONFIG_IR_XMP_DECODER is not set
+# CONFIG_IR_IMON_DECODER is not set
+# CONFIG_IR_RCMM_DECODER is not set
+# CONFIG_IR_SPI is not set
+# CONFIG_IR_GPIO_TX is not set
+# CONFIG_IR_PWM_TX is not set
+# CONFIG_IR_SERIAL is not set
+# CONFIG_IR_SIR is not set
+# CONFIG_RC_XBOX_DVD is not set
+# CONFIG_IR_TOY is not set
+' >>./target/linux/generic/config-5.10
 
 ### Shortcut-FE 部分 ###
 # Patch Kernel 以支持 Shortcut-FE
