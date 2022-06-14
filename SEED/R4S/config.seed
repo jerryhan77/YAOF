@@ -201,3 +201,6 @@ CONFIG_PACKAGE_kmod-ip6-vti=y
 CONFIG_PACKAGE_kmod-ipsec=y
 CONFIG_PACKAGE_kmod-ipsec4=y
 CONFIG_PACKAGE_kmod-ipsec6=y
+### KMOD ##(opkg got Segmentation fault due to upstream problem)
+CONFIG_PACKAGE_kmod-mt76x2=y
+CONFIG_PACKAGE_kmod-fs-nfs-common=y
