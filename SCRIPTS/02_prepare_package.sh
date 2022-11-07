@@ -33,6 +33,8 @@ CONFIG_LRU_GEN=y
 CONFIG_LRU_GEN_ENABLED=y
 # CONFIG_LRU_GEN_STATS is not set
 ' >>./target/linux/generic/config-5.10
+# TCP optimizations
+cp -rf ../PATCH/backport/TCP/* ./target/linux/generic/backport-5.10/
 # ZSTD
 cp -rf ../PATCH/backport/ZSTD/* ./target/linux/generic/hack-5.10/
 # Futex
@@ -115,9 +117,10 @@ rm -rf ./target/linux/rockchip/Makefile
 wget -P target/linux/rockchip/ https://github.com/openwrt/openwrt/raw/openwrt-22.03/target/linux/rockchip/Makefile
 rm -rf ./target/linux/rockchip/patches-5.10/002-net-usb-r8152-add-LED-configuration-from-OF.patch
 rm -rf ./target/linux/rockchip/patches-5.10/003-dt-bindings-net-add-RTL8152-binding-documentation.patch
+cp -rf ../PATCH/rockchip-5.10/* ./target/linux/rockchip/patches-5.10/
 
-mkdir -p target/linux/rockchip/files-5.10/arch/arm64/boot/dts/rockchip
-cp -rf ../PATCH/dts/* ./target/linux/rockchip/files-5.10/arch/arm64/boot/dts/rockchip/
+mkdir -p target/linux/rockchip/files-5.10
+cp -rf ../PATCH/files-5.10 ./target/linux/rockchip/
 
 rm -rf ./package/boot/uboot-rockchip
 svn export https://github.com/coolsnowwolf/lede/trunk/package/boot/uboot-rockchip package/boot/uboot-rockchip
@@ -137,9 +140,10 @@ echo '
 ' >>./target/linux/rockchip/armv8/config-5.10
 
 # Dnsmasq
-git clone -b mine --depth 1 https://git.openwrt.org/openwrt/staging/ldir.git
+#git clone -b mine --depth 1 https://git.openwrt.org/openwrt/staging/ldir.git
 rm -rf ./package/network/services/dnsmasq
-cp -rf ./ldir/package/network/services/dnsmasq ./package/network/services/
+#cp -rf ./ldir/package/network/services/dnsmasq ./package/network/services/
+svn export https://github.com/openwrt/openwrt/trunk/package/network/services/dnsmasq package/network/services/dnsmasq
 
 # LRNG
 cp -rf ../PATCH/LRNG/* ./target/linux/generic/hack-5.10/
