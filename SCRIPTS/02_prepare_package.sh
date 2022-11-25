@@ -119,6 +119,11 @@ rm -rf ./target/linux/rockchip/patches-5.10/002-net-usb-r8152-add-LED-configurat
 rm -rf ./target/linux/rockchip/patches-5.10/003-dt-bindings-net-add-RTL8152-binding-documentation.patch
 cp -rf ../PATCH/rockchip-5.10/* ./target/linux/rockchip/patches-5.10/
 
+rm -rf ./package/firmware/linux-firmware/intel.mk
+wget -P package/firmware/linux-firmware/ https://github.com/coolsnowwolf/lede/raw/master/package/firmware/linux-firmware/intel.mk
+rm -rf ./package/firmware/linux-firmware/Makefile
+wget -P package/firmware/linux-firmware/ https://github.com/coolsnowwolf/lede/raw/master/package/firmware/linux-firmware/Makefile
+
 mkdir -p target/linux/rockchip/files-5.10
 cp -rf ../PATCH/files-5.10 ./target/linux/rockchip/
 
@@ -193,7 +198,8 @@ svn export https://github.com/immortalwrt/immortalwrt/branches/master/package/ke
 svn export https://github.com/coolsnowwolf/lede/trunk/package/lean/r8125 package/new/r8125
 # igb-intel驱动
 svn export https://github.com/coolsnowwolf/lede/trunk/package/lean/igb-intel package/new/igb-intel
-#sed -i 's,kmod-usb-net-rtl8152,kmod-usb-net-rtl8152-vendor,g' target/linux/rockchip/image/armv8.mk
+# igc-backport
+cp -rf ../PATCH/igc-files-5.10 ./target/linux/x86/files-5.10
 # UPX 可执行软件压缩
 sed -i '/patchelf pkgconf/i\tools-y += ucl upx' ./tools/Makefile
 sed -i '\/autoconf\/compile :=/i\$(curdir)/upx/compile := $(curdir)/ucl/compile' ./tools/Makefile
@@ -403,7 +409,7 @@ svn export https://github.com/immortalwrt/luci/branches/openwrt-18.06/applicatio
 # ShadowsocksR Plus+ 依赖
 rm -rf ./feeds/packages/net/shadowsocks-libev
 svn export https://github.com/coolsnowwolf/packages/trunk/net/shadowsocks-libev package/lean/shadowsocks-libev
-svn export https://github.com/coolsnowwolf/packages/trunk/net/redsocks2 package/lean/redsocks2
+svn export https://github.com/fw876/helloworld/trunk/redsocks2 package/lean/redsocks2
 svn export https://github.com/coolsnowwolf/lede/trunk/package/lean/srelay package/lean/srelay
 svn export https://github.com/fw876/helloworld/trunk/trojan package/lean/trojan
 svn export https://github.com/fw876/helloworld/trunk/tcping package/lean/tcping
