@@ -2,8 +2,8 @@
 clear
 
 ### 基础部分 ###
-# 使用 O3 级别的优化
-sed -i 's/Os/O3 -Wl,--gc-sections/g' include/target.mk
+# 使用 O2 级别的优化
+sed -i 's/Os/O2 -Wl,--gc-sections/g' include/target.mk
 wget -qO - https://github.com/openwrt/openwrt/commit/8249a8c.patch | patch -p1
 wget -qO - https://github.com/openwrt/openwrt/commit/66fa343.patch | patch -p1
 # 更新 Feeds
@@ -22,7 +22,8 @@ wget -P include/ https://github.com/immortalwrt/immortalwrt/raw/master/include/d
 sed -i '/unshift/d' scripts/download.pl
 sed -i '/mirror02/d' scripts/download.pl
 echo "net.netfilter.nf_conntrack_helper = 1" >>./package/kernel/linux/files/sysctl-nf-conntrack.conf
-
+# Nginx
+sed -i "s/client_max_body_size 128M/client_max_body_size 2048M/g" feeds/packages/net/nginx-util/files/uci.conf.template
 
 ### 必要的 Patches ###
 cp -f ../PATCH/backport/290-remove-kconfig-CONFIG_I8K.patch ./target/linux/generic/hack-5.10/290-remove-kconfig-CONFIG_I8K.patch
@@ -203,8 +204,8 @@ cp -rf ../PATCH/igc-files-5.10 ./target/linux/x86/files-5.10
 # UPX 可执行软件压缩
 sed -i '/patchelf pkgconf/i\tools-y += ucl upx' ./tools/Makefile
 sed -i '\/autoconf\/compile :=/i\$(curdir)/upx/compile := $(curdir)/ucl/compile' ./tools/Makefile
-svn export https://github.com/coolsnowwolf/lede/trunk/tools/ucl tools/ucl
-svn export https://github.com/coolsnowwolf/lede/trunk/tools/upx tools/upx
+svn export https://github.com/Lienol/openwrt/trunk/tools/ucl tools/ucl
+svn export https://github.com/Lienol/openwrt/trunk/tools/upx tools/upx
 
 ### 获取额外的 LuCI 应用、主题和依赖 ###
 # 更换 golang 版本
@@ -237,6 +238,7 @@ svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-arpbi
 ln -sf ../../../feeds/luci/applications/luci-app-arpbind ./package/feeds/luci/luci-app-arpbind
 # 定时重启
 svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-autoreboot package/lean/luci-app-autoreboot
+sed -i '/LUCI_DEPENDS/d' package/lean/luci-app-autoreboot/Makefile
 # Boost 通用即插即用
 svn export https://github.com/QiuSimons/slim-wrt/branches/main/slimapps/application/luci-app-boostupnp package/new/luci-app-boostupnp
 rm -rf ./feeds/packages/net/miniupnpd
@@ -247,7 +249,11 @@ wget -qO- https://github.com/openwrt/packages/commit/d811cb4.patch | patch -p1
 wget -qO- https://github.com/openwrt/packages/commit/9a2da85.patch | patch -p1
 wget -qO- https://github.com/openwrt/packages/commit/71dc090.patch | patch -p1
 popd
-sed -i '/firewall4.include/d' feeds/packages/net/miniupnpd/Makefile
+wget -P feeds/packages/net/miniupnpd/patches/ https://github.com/ptpt52/openwrt-packages/raw/master/net/miniupnpd/patches/201-change-default-chain-rule-to-accept.patch
+wget -P feeds/packages/net/miniupnpd/patches/ https://github.com/ptpt52/openwrt-packages/raw/master/net/miniupnpd/patches/500-0004-miniupnpd-format-xml-to-make-some-app-happy.patch
+wget -P feeds/packages/net/miniupnpd/patches/ https://github.com/ptpt52/openwrt-packages/raw/master/net/miniupnpd/patches/500-0005-miniupnpd-stun-ignore-external-port-changed.patch
+wget -P feeds/packages/net/miniupnpd/patches/ https://github.com/ptpt52/openwrt-packages/raw/master/net/miniupnpd/patches/500-0006-miniupnpd-fix-stun-POSTROUTING-filter-for-openwrt.patch
+#sed -i '/firewall4.include/d' feeds/packages/net/miniupnpd/Makefile
 rm -rf ./feeds/luci/applications/luci-app-upnp
 #git clone -b main --depth 1 https://github.com/msylgj/luci-app-upnp feeds/luci/applications/luci-app-upnp
 svn export https://github.com/openwrt/luci/trunk/applications/luci-app-upnp feeds/luci/applications/luci-app-upnp
@@ -277,13 +283,15 @@ ln -sf ../../../feeds/luci/applications/luci-app-aliddns ./package/feeds/luci/lu
 rm -rf ./feeds/luci/applications/luci-app-dockerman
 svn export https://github.com/lisaac/luci-app-dockerman/trunk/applications/luci-app-dockerman feeds/luci/applications/luci-app-dockerman
 sed -i '/auto_start/d' feeds/luci/applications/luci-app-dockerman/root/etc/uci-defaults/luci-app-dockerman
-pushd feeds/packages
-wget -qO- https://github.com/openwrt/packages/commit/33ed553.patch | patch -p1
+pushd feeds/luci
+wget -qO- https://github.com/openwrt/luci/commit/0c1fc7f.patch | patch -p1
 popd
+pushd feeds/packages
+wget -qO- https://github.com/openwrt/packages/commit/d9d5109.patch | patch -p1
+popd
+sed -i '/sysctl.d/d' feeds/packages/utils/dockerd/Makefile
 rm -rf ./feeds/luci/collections/luci-lib-docker
 svn export https://github.com/lisaac/luci-lib-docker/trunk/collections/luci-lib-docker feeds/luci/collections/luci-lib-docker
-#sed -i 's/+docker/+docker \\\n\t+dockerd/g' ./feeds/luci/applications/luci-app-dockerman/Makefile
-sed -i '/sysctl.d/d' feeds/packages/utils/dockerd/Makefile
 sed -i 's,# CONFIG_BLK_CGROUP_IOCOST is not set,CONFIG_BLK_CGROUP_IOCOST=y,g' target/linux/generic/config-5.10
 # DiskMan
 mkdir -p package/new/luci-app-diskman && \
@@ -471,6 +479,8 @@ ln -sf ../../../feeds/packages/libs/toml11 ./package/feeds/packages/toml11
 git clone -b js --depth 1 https://github.com/UnblockNeteaseMusic/luci-app-unblockneteasemusic.git package/new/UnblockNeteaseMusic
 # ucode
 #svn export https://github.com/openwrt/openwrt/trunk/package/utils/ucode package/utils/ucode
+# uwsgi
+sed -i 's,procd_set_param stderr 1,procd_set_param stderr 0,g' feeds/packages/net/uwsgi/files/uwsgi.init
 # USB 打印机
 svn export https://github.com/coolsnowwolf/luci/trunk/applications/luci-app-usb-printer package/lean/luci-app-usb-printer
 # UU加速器
@@ -496,7 +506,7 @@ git clone -b master --depth 1 https://github.com/brvphoenix/luci-app-wrtbwmon.gi
 # 迅雷快鸟宽带加速
 git clone --depth 1 https://github.com/kiddin9/luci-app-xlnetacc.git package/lean/luci-app-xlnetacc
 # Zerotier
-svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-zerotier feeds/luci/applications/luci-app-zerotier
+svn export https://github.com/immortalwrt/luci/branches/master/applications/luci-app-zerotier feeds/luci/applications/luci-app-zerotier
 #svn export https://github.com/wongsyrone/lede-1/trunk/package/external/luci-app-zerotier feeds/luci/applications/luci-app-zerotier
 #svn export https://github.com/immortalwrt/luci/trunk/applications/luci-app-zerotier feeds/luci/applications/luci-app-zerotier
 wget -P feeds/luci/applications/luci-app-zerotier/ https://github.com/QiuSimons/OpenWrt-Add/raw/master/move_2_services.sh
