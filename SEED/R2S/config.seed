@@ -199,3 +199,26 @@ CONFIG_DOCKER_NET_OVERLAY=y
 CONFIG_DOCKER_NET_TFTP=y
 CONFIG_DOCKER_STO_BTRFS=y
 CONFIG_DOCKER_STO_EXT4=y
+
+### OpenConnect Support
+CONFIG_PACKAGE_luci-proto-openconnect=y
+CONFIG_PACKAGE_openconnect=y
+CONFIG_PACKAGE_ocserv=y
+CONFIG_PACKAGE_luci-app-ocserv=y
+CONFIG_OPENCONNECT_OPENSSL=y
+CONFIG_OPENCONNECT_STOKEN=y
+CONFIG_PACKAGE_kmod-usb-net-asix=y
+CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=y
+
+### StrongSWAN Support
+CONFIG_PACKAGE_strongswan=y
+CONFIG_PACKAGE_strongswan-full=y
+CONFIG_PACKAGE_vti=y
+CONFIG_PACKAGE_vtiv4=y
+CONFIG_PACKAGE_vtiv6=y
+CONFIG_PACKAGE_kmod-ip-vti=y
+CONFIG_PACKAGE_kmod-ip6-tunnel=y
+CONFIG_PACKAGE_kmod-ip6-vti=y
+CONFIG_PACKAGE_kmod-ipsec=y
+CONFIG_PACKAGE_kmod-ipsec4=y
+CONFIG_PACKAGE_kmod-ipsec6=y
