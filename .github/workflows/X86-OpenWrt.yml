@@ -29,7 +29,7 @@ jobs:
       with:
         swap-size-mb: 512
         temp-reserve-mb: 100
-        root-reserve-mb: 1280
+        root-reserve-mb: 2048
         remove-dotnet: 'true'
         remove-android: 'true'
         remove-haskell: 'true'
@@ -46,8 +46,8 @@ jobs:
         sudo -E apt-get -qq install aria2
         sudo -E wget -P /usr/local/sbin/ https://github.com/HiGarfield/lede-17.01.4-Mod/raw/master/.github/backup/apt-fast
         sudo -E chmod -R 755 /usr/local/sbin/apt-fast
-        sudo -E apt-fast -y -qq install dwarves llvm clang lldb lld build-essential rsync asciidoc binutils bzip2 gawk gettext git libncurses5-dev patch python3 python2.7 unzip zlib1g-dev lib32gcc-s1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libreadline-dev libglib2.0-dev xmlto qemu-utils upx-ucl libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget ccache curl swig coreutils vim nano python3 python3-pip python3-ply haveged lrzsz scons libpython3-dev
-        sudo -E pip3 install pyelftools pylibfdt
+        sudo -E apt-fast -y -qq install dwarves quilt llvm clang lldb lld build-essential rsync asciidoc binutils bzip2 gawk gettext git libncurses5-dev patch python2.7 unzip zlib1g-dev lib32gcc-s1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib p7zip-full msmtp libssl-dev texinfo libreadline-dev libglib2.0-dev xmlto qemu-utils upx-ucl libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget ccache curl swig coreutils vim nano python3 python3-dev python3-pip python3-ply python3-pyelftools lrzsz scons
+        pip3 install --user -U pylibfdt
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo -E git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
@@ -113,8 +113,6 @@ jobs:
         cat openwrt/.config
         echo '================================================================'
         cd openwrt && make -j1 V=s
-    - name: Print Disk Space After
-      run: df -h
     - name: Organize files
       id: organize
       run: |
@@ -130,21 +128,17 @@ jobs:
         zip X86-GC404-Docker-$(date +%Y-%m-%d)-${{ env.latest_release }}-ext4.zip *ext4-combined*
         zip X86-GC404-Docker-$(date +%Y-%m-%d)-${{ env.latest_release }}-sfs.zip *squashfs-combined*
         ls -Ahl
-    - name: Upload artifact
-      uses: actions/upload-artifact@main
-      with:
-        name: OpenWRT_${{ env.latest_release }}
-        path: ./artifact/
-
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1.12.0
       with:
         name: OpenWRT-${{ env.latest_release }}
         allowUpdates: true
-        prerelease: true
+        prerelease: false
         tag: ${{ env.latest_release }}
         commit: 23.05
         replacesArtifacts: true
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ./artifact/*.zip
+    - name: Print Disk Space After
+      run: df -h
